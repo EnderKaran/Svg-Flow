@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SVG-Flow
 
-## Getting Started
+**Turn SVGs into production-ready React components. Instantly.**
 
-First, run the development server:
+SVG-Flow, ham SVG kodlarını temizleyen, optimize eden ve modern React (TSX) bileşenlerine dönüştüren yüksek performanslı bir geliştirici aracıdır. Karmaşık XML çöplerinden kurtulun ve projelerinize saniyeler içinde temiz kod entegre edin.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+[Live Demo ](https://svg-flow.vercel.app/)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Özellikler
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **SVGO Entegrasyonu:** Gereksiz metadata, ID ve grupları otomatik temizler.
+* **AST-Based Transformation:** SVG niteliklerini React-uyumlu (camelCase) yapılara dönüştürür.
+* **Monaco Editor Deneyimi:** VS Code çekirdeği ile syntax highlighting ve akıllı kod düzenleme.
+* **Live Preview:** Dönüştürdüğünüz ikonun nasıl göründüğünü anlık olarak takip edin.
+* **Tailwind & Lucide Style:** Üretilen bileşenler `size` ve `className` prop'ları ile tam kontrol edilebilir.
+* **Sonner Notifications:** Akıcı ve modern kullanıcı geribildirimleri.
 
-## Learn More
+##  Teknoloji Yığını
 
-To learn more about Next.js, take a look at the following resources:
+* **Framework:** [Next.js 16 (App Router)](https://nextjs.org/)
+* **Language:** [TypeScript](https://www.typescriptlang.org/)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+* **UI Components:** [Shadcn UI](https://ui.shadcn.com/)
+* **Animations:** [Framer Motion](https://www.framer.com/motion/)
+* **Icons:** [Lucide React](https://lucide.dev/)
+* **Engine:** [SVGO](https://github.com/svg/svgo)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Yerel Kurulum
 
-## Deploy on Vercel
+Projeyi kendi makinenizde çalıştırmak için:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Repoyu clone'layın:
+   ```bash
+   git clone [https://github.com/EnderKaran/Svg-Flow](https://github.com/EnderKaran/Svg-Flow)
+   ```
+2. Bağımlılıkları yükleyin:
+   ```bash
+   npm install
+   ```
+3. Geliştirme sunucusunu başlatın:
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Mühendislik Yaklaşımı (Senior Insights)
+
+Bu proje sadece bir "string replacer" değildir. Bir mühendislik aracı olarak şu yaklaşımları benimser:
+- **Server Actions:** Ağır optimizasyon işlemleri (SVGO) sunucu tarafında güvenli bir şekilde işlenir.
+- **Component Architecture:** Shadcn UI ve Radix UI ile erişilebilir ve modüler bileşen yapısı.
+- **DX (Developer Experience):** JetBrains Mono fontu ve koyu mod odaklı tasarım ile uzun süreli kullanıma uygun arayüz.
+
+---
+
+## Lisans
+
+Bu proje MIT lisansı altındadır.
+
+
