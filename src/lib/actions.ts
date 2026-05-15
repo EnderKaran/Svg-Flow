@@ -1,7 +1,15 @@
 'use server'
 
 import { optimize } from 'svgo';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { db } from '@/db';
+import { savedComponents, users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
 
+/**
+ * SVG kodunu optimize eder ve React (TSX) bileşenine dönüştürür.
+ */
 export async function convertSvgToComponent(rawSvg: string) {
   if (!rawSvg || rawSvg.trim() === '') {
     return '// Lütfen geçerli bir SVG kodu girin.';
@@ -9,15 +17,15 @@ export async function convertSvgToComponent(rawSvg: string) {
 
   try {
     const result = optimize(rawSvg, {
-      multipass: true, 
+      multipass: true,
       plugins: [
         'preset-default',
-        'removeDimensions', 
+        'removeDimensions',
         {
           name: 'removeAttributesBySelector',
           params: {
             selector: 'svg',
-            attributes: ['class', 'id'], 
+            attributes: ['class', 'id'],
           },
         },
         {
@@ -25,7 +33,7 @@ export async function convertSvgToComponent(rawSvg: string) {
           params: {
             attributes: [
               { fill: 'currentColor' },
-              { 'stroke': 'currentColor' },
+              { stroke: 'currentColor' },
             ],
           },
         },
@@ -34,20 +42,20 @@ export async function convertSvgToComponent(rawSvg: string) {
 
     const cleanSvg = result.data;
 
-    
+    // React JSX Nitelik Dönüşümleri
     const jsxSvg = cleanSvg
       .replace(/stroke-width=/g, 'strokeWidth=')
       .replace(/stroke-linecap=/g, 'strokeLinecap=')
       .replace(/stroke-linejoin=/g, 'strokeLinejoin=')
       .replace(/fill-rule=/g, 'fillRule=')
       .replace(/clip-rule=/g, 'clipRule=')
-      .replace(/viewbox=/g, 'viewBox='); 
-    
+      .replace(/viewbox=/g, 'viewBox=');
+
     const componentName = "GeneratedIcon";
-    
+
     const tsxOutput = `
 import React from 'react';
-import { cn } from "@/lib/utils"; // Tailwind merge yardımcısı (eğer varsa)
+import { cn } from "@/lib/utils";
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number | string;
@@ -60,7 +68,7 @@ export const ${componentName} = ({
   ...props 
 }: IconProps) => (
   ${jsxSvg.replace(
-    '<svg', 
+    '<svg',
     `<svg 
     width={size} 
     height={size} 
@@ -73,9 +81,71 @@ export default ${componentName};
 `.trim();
 
     return tsxOutput;
-
   } catch (error) {
     console.error("Conversion Error:", error);
-    return `// Hata: SVG dönüştürülemedi. Lütfen kodun doğruluğunu kontrol edin.\n// ${error}`;
+    return `// Hata: SVG dönüştürülemedi.\n// ${error}`;
+  }
+}
+
+/**
+ * Kullanıcıyı veritabanında senkronize eder (Upsert mantığı).
+ */
+async function getOrCreateUser() {
+  const { userId: clerkId } = await auth();
+  const user = await currentUser();
+
+  if (!clerkId || !user) return null;
+
+  // Önce kullanıcıyı kontrol et
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.clerkId, clerkId),
+  });
+
+  if (existingUser) return existingUser;
+
+  // Yoksa oluştur (User Sync)
+  const [newUser] = await db.insert(users).values({
+    clerkId,
+    email: user.emailAddresses[0].emailAddress,
+    name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+  }).returning();
+
+  return newUser;
+}
+
+/**
+ * Üretilen bileşeni Neon veritabanına (The Vault) kaydeder.
+ */
+export async function saveToVault({
+  name,
+  rawSvg,
+  optimizedTsx,
+}: {
+  name: string;
+  rawSvg: string;
+  optimizedTsx: string;
+}) {
+  try {
+    const dbUser = await getOrCreateUser();
+
+    if (!dbUser) {
+      return { success: false, error: "Oturum açmanız gerekiyor." };
+    }
+
+    await db.insert(savedComponents).values({
+      name: name || "Untitled Icon",
+      rawSvg,
+      optimizedTsx,
+      userId: dbUser.id,
+      category: "Icon",
+    });
+
+    // Vault sayfası verilerini tazelemek için cache'i temizle
+    revalidatePath("/vault");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Database Save Error:", error);
+    return { success: false, error: "Veritabanına kaydedilirken bir hata oluştu." };
   }
 }
