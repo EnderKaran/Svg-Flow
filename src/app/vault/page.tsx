@@ -1,7 +1,10 @@
+// src/app/vault/page.tsx
+
 import { getVaultComponents } from "@/lib/actions";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { ArrowLeft, LayoutGrid, Trash2, Copy, Eye } from "lucide-react";
+import { ArrowLeft, LayoutGrid, Copy } from "lucide-react";
+import DeleteButton from "@/components/vault/DeleteButton"; // Yeni import
 
 export default async function VaultPage() {
   const components = await getVaultComponents();
@@ -9,7 +12,7 @@ export default async function VaultPage() {
   return (
     <div className="min-h-screen bg-[#0B1120] bg-grid flex flex-col font-sans selection:bg-teal-500/30">
       
-      {/* --- VAULT HEADER --- */}
+      {/* --- HEADER --- */}
       <header className="h-16 border-b border-slate-800/60 bg-[#0B1120]/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <Link href="/">
@@ -18,7 +21,7 @@ export default async function VaultPage() {
             </button>
           </Link>
           <div className="h-4 w-px bg-slate-800"></div>
-          <h1 className="text-sm font-bold tracking-[0.2em] text-white uppercase italic">The Vault</h1>
+          <h1 className="text-sm font-bold tracking-[0.2em] text-white uppercase italic tracking-tighter">The Vault</h1>
         </div>
 
         <div className="flex items-center gap-4">
@@ -37,12 +40,9 @@ export default async function VaultPage() {
             <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800 mb-4">
               <LayoutGrid size={32} className="text-slate-700" />
             </div>
-            <h2 className="text-slate-400 font-bold tracking-tight">Kütüphaneniz Henüz Boş</h2>
-            <p className="text-slate-600 text-xs mt-2 max-w-xs">
-              Dönüştürücüye gidip ilk ikonunuzu oluşturun ve kütüphanenize kaydedin.
-            </p>
+            <h2 className="text-slate-400 font-bold tracking-tight uppercase">Kütüphaneniz Henüz Boş</h2>
             <Link href="/" className="mt-6">
-              <button className="bg-teal-500 text-slate-950 font-bold px-6 py-2 rounded-lg text-xs hover:bg-teal-400 transition-all">
+              <button className="bg-teal-500 text-slate-950 font-bold px-6 py-2 rounded-lg text-[10px] uppercase tracking-wider hover:bg-teal-400 transition-all">
                 Dönüştürücüye Git
               </button>
             </Link>
@@ -66,7 +66,7 @@ export default async function VaultPage() {
                 <div className="p-4 border-t border-slate-800/40 bg-slate-900/50">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-[11px] font-bold text-white tracking-widest uppercase truncate max-w-[120px]">
+                      <h3 className="text-[10px] font-bold text-white tracking-widest uppercase truncate max-w-[100px]">
                         {item.name}
                       </h3>
                       <span className="text-[9px] text-slate-500 font-mono uppercase">
@@ -78,9 +78,9 @@ export default async function VaultPage() {
                       <button className="p-2 hover:bg-slate-800 rounded-md text-slate-400 hover:text-teal-400 transition-colors">
                         <Copy size={14} />
                       </button>
-                      <button className="p-2 hover:bg-slate-800 rounded-md text-slate-400 hover:text-rose-400 transition-colors">
-                        <Trash2 size={14} />
-                      </button>
+                      
+                      {/* Silme Butonu Buraya Geldi */}
+                      <DeleteButton id={item.id} />
                     </div>
                   </div>
                 </div>
@@ -96,7 +96,7 @@ export default async function VaultPage() {
           <div className="w-1 h-1 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(79,70,229,0.6)]"></div>
           Secure_Vault_Linked
         </div>
-        <span>Storage: Active</span>
+        <span>System_Online</span>
       </footer>
 
     </div>

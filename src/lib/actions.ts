@@ -4,7 +4,7 @@ import { optimize } from 'svgo';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { savedComponents, users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq , and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 /**
@@ -172,5 +172,32 @@ export async function getVaultComponents() {
   } catch (error) {
     console.error("Vault Fetch Error:", error);
     return [];
+  }
+}
+
+export async function deleteVaultComponent(id: string) {
+  try {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) return { success: false, error: "Oturum açmanız gerekiyor." };
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.clerkId, clerkId),
+    });
+
+    if (!user) return { success: false, error: "Kullanıcı bulunamadı." };
+
+    // Hem ID hem de userId kontrolü (Güvenlik için kritik)
+    await db.delete(savedComponents).where(
+      and(
+        eq(savedComponents.id, id),
+        eq(savedComponents.userId, user.id)
+      )
+    );
+
+    revalidatePath("/vault");
+    return { success: true };
+  } catch (error) {
+    console.error("Delete Error:", error);
+    return { success: false, error: "Silme işlemi başarısız oldu." };
   }
 }
