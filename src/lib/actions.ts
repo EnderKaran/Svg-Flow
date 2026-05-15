@@ -6,84 +6,45 @@ import { db } from '@/db';
 import { savedComponents, users } from '@/db/schema';
 import { eq , and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { defaultSvgoConfig, SvgoConfig } from '@/types';
 
 /**
  * SVG kodunu optimize eder ve React (TSX) bileşenine dönüştürür.
  */
-export async function convertSvgToComponent(rawSvg: string) {
-  if (!rawSvg || rawSvg.trim() === '') {
-    return '// Lütfen geçerli bir SVG kodu girin.';
-  }
+export async function convertSvgToComponent(rawSvg: string, config: SvgoConfig = defaultSvgoConfig) {
+  if (!rawSvg?.trim()) return '// Lütfen geçerli bir SVG kodu girin.';
 
   try {
     const result = optimize(rawSvg, {
       multipass: true,
+      js2svg: {
+        indent: 2,
+        pretty: config.pretty,
+      },
       plugins: [
         'preset-default',
-        'removeDimensions',
+        config.removeDimensions ? 'removeDimensions' : '',
+        config.prefixIds ? 'prefixIds' : '',
         {
           name: 'removeAttributesBySelector',
           params: {
             selector: 'svg',
-            attributes: ['class', 'id'],
+            attributes: config.removeAttributes,
           },
         },
         {
           name: 'addAttributesToSVGElement',
           params: {
-            attributes: [
-              { fill: 'currentColor' },
-              { stroke: 'currentColor' },
-            ],
+            attributes: [config.addAttributes],
           },
         },
-      ],
+      ].filter(Boolean) as any,
     });
 
-    const cleanSvg = result.data;
-
-    // React JSX Nitelik Dönüşümleri
-    const jsxSvg = cleanSvg
-      .replace(/stroke-width=/g, 'strokeWidth=')
-      .replace(/stroke-linecap=/g, 'strokeLinecap=')
-      .replace(/stroke-linejoin=/g, 'strokeLinejoin=')
-      .replace(/fill-rule=/g, 'fillRule=')
-      .replace(/clip-rule=/g, 'clipRule=')
-      .replace(/viewbox=/g, 'viewBox=');
-
-    const componentName = "GeneratedIcon";
-
-    const tsxOutput = `
-import React from 'react';
-import { cn } from "@/lib/utils";
-
-interface IconProps extends React.SVGProps<SVGSVGElement> {
-  size?: number | string;
-  className?: string;
-}
-
-export const ${componentName} = ({ 
-  size = 24, 
-  className, 
-  ...props 
-}: IconProps) => (
-  ${jsxSvg.replace(
-    '<svg',
-    `<svg 
-    width={size} 
-    height={size} 
-    className={cn("shrink-0", className)} 
-    {...props}`
-  )}
-);
-
-export default ${componentName};
-`.trim();
-
-    return tsxOutput;
+    return result.data;
   } catch (error) {
-    console.error("Conversion Error:", error);
-    return `// Hata: SVG dönüştürülemedi.\n// ${error}`;
+    console.error('SVGO Error:', error);
+    return '// SVG işlenirken bir hata oluştu.';
   }
 }
 
