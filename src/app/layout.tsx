@@ -3,6 +3,7 @@ import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
+import { ClerkProvider } from '@clerk/nextjs'
 
 // UI için modern font
 const geistSans = Geist({
@@ -30,11 +31,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
-      <body
-        className={cn(
-          "min-h-screen bg-[#0B1120] text-slate-200 antialiased font-sans",
-          geistSans.variable,
+    <ClerkProvider appearance={{ baseTheme: undefined }}>
+      <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
+        <body
+          className={cn(
+            "min-h-screen bg-[#0B1120] text-slate-200 antialiased font-sans",
+            geistSans.variable,
           jetbrainsMono.variable
         )}
       >
@@ -49,5 +51,6 @@ export default function RootLayout({
         />
       </body>
     </html>
+    </ClerkProvider>
   );
 }
