@@ -149,3 +149,28 @@ export async function saveToVault({
     return { success: false, error: "Veritabanına kaydedilirken bir hata oluştu." };
   }
 }
+
+export async function getVaultComponents() {
+  try {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) return [];
+
+    // Önce dahili kullanıcı ID'sini alıyoruz
+    const user = await db.query.users.findFirst({
+      where: eq(users.clerkId, clerkId),
+    });
+
+    if (!user) return [];
+
+    // Kullanıcıya ait tüm bileşenleri en yeni en üstte olacak şekilde getiriyoruz
+    const results = await db.query.savedComponents.findMany({
+      where: eq(savedComponents.userId, user.id),
+      orderBy: (savedComponents, { desc }) => [desc(savedComponents.createdAt)],
+    });
+
+    return results;
+  } catch (error) {
+    console.error("Vault Fetch Error:", error);
+    return [];
+  }
+}

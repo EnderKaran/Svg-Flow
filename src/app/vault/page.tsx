@@ -1,69 +1,104 @@
+import { getVaultComponents } from "@/lib/actions";
 import { UserButton } from "@clerk/nextjs";
-import { Search, Filter, Grid2X2, List } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { ArrowLeft, LayoutGrid, Trash2, Copy, Eye } from "lucide-react";
 
-export default function VaultPage() {
+export default async function VaultPage() {
+  const components = await getVaultComponents();
+
   return (
-    <div className="min-h-screen bg-[#0B1120] bg-grid">
-      {/* Vault Header */}
-      <header className="h-20 border-b border-slate-800/60 bg-[#0B1120]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-6">
-          <div className="flex items-center gap-8">
-            <h1 className="text-xl font-bold tracking-tight text-white uppercase italic">The Vault</h1>
-            <div className="relative w-64 hidden md:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
-              <Input 
-                placeholder="Search components..." 
-                className="bg-slate-900/50 border-slate-800 pl-9 text-xs focus-visible:ring-teal-500/50"
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <UserButton />
-          </div>
+    <div className="min-h-screen bg-[#0B1120] bg-grid flex flex-col font-sans selection:bg-teal-500/30">
+      
+      {/* --- VAULT HEADER --- */}
+      <header className="h-16 border-b border-slate-800/60 bg-[#0B1120]/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-50">
+        <div className="flex items-center gap-4">
+          <Link href="/">
+            <button className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-white transition-colors">
+              <ArrowLeft size={18} />
+            </button>
+          </Link>
+          <div className="h-4 w-px bg-slate-800"></div>
+          <h1 className="text-sm font-bold tracking-[0.2em] text-white uppercase italic">The Vault</h1>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
+            {components.length} Items Stored
+          </span>
+          <UserButton />
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-6">
-        {/* Kontrol Paneli */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <button className="px-4 py-1.5 rounded-full bg-teal-500 text-slate-950 text-xs font-bold transition-all">All</button>
-            <button className="px-4 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-xs font-medium hover:text-white transition-all">Icons</button>
-            <button className="px-4 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-xs font-medium hover:text-white transition-all">Illustrations</button>
+      {/* --- MAIN CONTENT --- */}
+      <main className="flex-1 max-w-7xl mx-auto w-full p-6 lg:p-12">
+        
+        {components.length === 0 ? (
+          <div className="h-[60vh] flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800 mb-4">
+              <LayoutGrid size={32} className="text-slate-700" />
+            </div>
+            <h2 className="text-slate-400 font-bold tracking-tight">Kütüphaneniz Henüz Boş</h2>
+            <p className="text-slate-600 text-xs mt-2 max-w-xs">
+              Dönüştürücüye gidip ilk ikonunuzu oluşturun ve kütüphanenize kaydedin.
+            </p>
+            <Link href="/" className="mt-6">
+              <button className="bg-teal-500 text-slate-950 font-bold px-6 py-2 rounded-lg text-xs hover:bg-teal-400 transition-all">
+                Dönüştürücüye Git
+              </button>
+            </Link>
           </div>
-          
-          <div className="flex items-center gap-2 p-1 bg-slate-950 rounded-lg border border-slate-800">
-            <button className="p-1.5 bg-slate-800 text-white rounded-md"><Grid2X2 size={14} /></button>
-            <button className="p-1.5 text-slate-500 hover:text-white transition-all"><List size={14} /></button>
-          </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {components.map((item) => (
+              <div 
+                key={item.id} 
+                className="group relative bg-slate-900/40 border border-slate-800/80 rounded-3xl overflow-hidden backdrop-blur-sm transition-all hover:border-indigo-500/30 hover:shadow-[0_0_40px_rgba(79,70,229,0.05)] flex flex-col"
+              >
+                {/* Visual Preview Area */}
+                <div className="aspect-square flex items-center justify-center p-12 bg-slate-950/20">
+                  <div 
+                    className="w-full h-full text-indigo-400 group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+                    dangerouslySetInnerHTML={{ __html: item.rawSvg }}
+                  />
+                </div>
 
-        {/* Bento Grid Sistemi */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card Component Örneği */}
-          <div className="group relative aspect-square bg-slate-900/40 border border-slate-800/80 rounded-3xl overflow-hidden backdrop-blur-sm transition-all hover:border-teal-500/30 hover:shadow-[0_0_30px_rgba(20,184,166,0.1)]">
-            <div className="absolute inset-0 flex items-center justify-center p-12">
-               {/* SVG Preview Buraya Gelecek */}
-               <div className="w-full h-full text-teal-400 group-hover:scale-110 transition-transform duration-500">
-                  {/* Placeholder SVG */}
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                  </svg>
-               </div>
-            </div>
-            
-            {/* Card Info Overlay */}
-            <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-slate-950/90 to-transparent translate-y-2 group-hover:translate-y-0 transition-transform">
-               <p className="text-[10px] font-mono text-teal-500 font-bold uppercase tracking-widest">CubeComponent</p>
-               <p className="text-[9px] text-slate-500 uppercase mt-0.5">Created 2h ago</p>
-            </div>
+                {/* Info & Actions */}
+                <div className="p-4 border-t border-slate-800/40 bg-slate-900/50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-[11px] font-bold text-white tracking-widest uppercase truncate max-w-[120px]">
+                        {item.name}
+                      </h3>
+                      <span className="text-[9px] text-slate-500 font-mono uppercase">
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button className="p-2 hover:bg-slate-800 rounded-md text-slate-400 hover:text-teal-400 transition-colors">
+                        <Copy size={14} />
+                      </button>
+                      <button className="p-2 hover:bg-slate-800 rounded-md text-slate-400 hover:text-rose-400 transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          
-          {/* Gelecekte burası db.savedComponent.map(...) ile dönecek */}
-        </div>
+        )}
       </main>
+
+      {/* --- STATUS FOOTER --- */}
+      <footer className="h-8 border-t border-slate-800/60 bg-[#0B1120] flex items-center px-6 text-[10px] uppercase font-mono tracking-[0.2em] text-slate-500 justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-1 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(79,70,229,0.6)]"></div>
+          Secure_Vault_Linked
+        </div>
+        <span>Storage: Active</span>
+      </footer>
+
     </div>
   );
 }
