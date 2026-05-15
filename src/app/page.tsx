@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import Link from "next/link";
 import { 
   Play, 
@@ -39,6 +39,23 @@ export default function LabPage() {
   const [isConverting, setIsConverting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [config, setConfig] = useState<SvgoConfig>(defaultSvgoConfig);
+
+  useEffect(() => {
+    const savedConfig = localStorage.getItem("svg-flow-config");
+    if (savedConfig) {
+      try {
+        const parsedConfig = JSON.parse(savedConfig);
+        setConfig(parsedConfig);
+      } catch (error) {
+        console.error("Config yükleme hatası:", error);
+      }
+    }
+  }, []);
+
+  // 2. Config her değiştiğinde LocalStorage'ı güncelle
+  useEffect(() => {
+    localStorage.setItem("svg-flow-config", JSON.stringify(config));
+  }, [config]);
 
   // --- FONKSİYONLAR ---
 

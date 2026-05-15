@@ -2,11 +2,16 @@
   "name": "svg-flow",
   "version": "0.1.0",
   "private": true,
+  "bin": {
+  "svg-flow": "./dist/cli/index.js"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "cli:build": "tsc src/cli/index.ts --outDir dist/cli --module commonjs",
+    "cli:test": "node dist/cli/index.js ./test-icons -o ./src/components/icons"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.3.4",
@@ -15,8 +20,11 @@
     "@phosphor-icons/react": "^2.1.10",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "commander": "^14.0.3",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.38.0",
+    "fs-extra": "^11.3.5",
+    "glob": "^13.0.6",
     "lucide-react": "^1.8.0",
     "next": "16.2.4",
     "next-themes": "^0.4.6",
@@ -31,6 +39,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
