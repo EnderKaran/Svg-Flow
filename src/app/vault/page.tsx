@@ -4,7 +4,8 @@ import { getVaultComponents } from "@/lib/actions";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowLeft, LayoutGrid, Copy } from "lucide-react";
-import DeleteButton from "@/components/vault/DeleteButton"; // Yeni import
+import DeleteButton from "@/components/vault/DeleteButton";
+import CopyButton from "@/components/vault/CopyButton";
 
 export default async function VaultPage() {
   const components = await getVaultComponents();
@@ -75,10 +76,10 @@ export default async function VaultPage() {
                     </div>
                     
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 hover:bg-slate-800 rounded-md text-slate-400 hover:text-teal-400 transition-colors">
-                        <Copy size={14} />
-                      </button>
-                      
+                      <CopyButton 
+                            code={item.optimizedTsx} 
+                            name={item.name} 
+                        />
                       {/* Silme Butonu Buraya Geldi */}
                       <DeleteButton id={item.id} />
                     </div>
