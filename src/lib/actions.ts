@@ -4,7 +4,7 @@ import { optimize } from 'svgo';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { savedComponents, users } from '@/db/schema';
-import { eq , and } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { defaultSvgoConfig, SvgoConfig } from '@/types';
 
@@ -41,7 +41,49 @@ export async function convertSvgToComponent(rawSvg: string, config: SvgoConfig =
       ].filter(Boolean) as any,
     });
 
-    return result.data;
+    const cleanSvg = result.data;
+
+    // React JSX Nitelik Dönüşümleri (Kritik Kısım)
+    const jsxSvg = cleanSvg
+      .replace(/stroke-width=/g, 'strokeWidth=')
+      .replace(/stroke-linecap=/g, 'strokeLinecap=')
+      .replace(/stroke-linejoin=/g, 'strokeLinejoin=')
+      .replace(/fill-rule=/g, 'fillRule=')
+      .replace(/clip-rule=/g, 'clipRule=')
+      .replace(/viewbox=/g, 'viewBox=')
+      .replace(/class=/g, 'className=');
+
+    const componentName = "GeneratedIcon";
+
+    // TSX Şablon Giydirme İşlemi
+    const tsxOutput = `
+import React from 'react';
+import { cn } from "@/lib/utils";
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  size?: number | string;
+  className?: string;
+}
+
+export const ${componentName} = ({ 
+  size = 24, 
+  className, 
+  ...props 
+}: IconProps) => (
+  ${jsxSvg.replace(
+    '<svg',
+    `<svg 
+    width={size} 
+    height={size} 
+    className={cn("shrink-0", className)} 
+    {...props}`
+  )}
+);
+
+export default ${componentName};
+`.trim();
+
+    return tsxOutput;
   } catch (error) {
     console.error('SVGO Error:', error);
     return '// SVG işlenirken bir hata oluştu.';
